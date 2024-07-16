@@ -676,7 +676,7 @@ export default function MainPage({navigation, route}) {
             })
           }>
           <FontAwesome name="arrow-up" size={24} color="#FEBF32" />
-          <Text style={styles.buttonText}>Send</Text>
+          <Text style={styles.buttonText}>Sends</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
