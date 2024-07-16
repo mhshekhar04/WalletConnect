@@ -9,7 +9,7 @@ const Receive = () => {
 
   const handleCopyAddress = () => {
     Clipboard.setString(selectedAccount.address);
-    Alert.alert('Copied to clipboard', 'The account address has been copied to your clipboard.');
+   
   };
 
   return (

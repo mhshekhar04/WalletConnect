@@ -1,10 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-// App.tsx
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -43,6 +36,7 @@ import YourWallet from './components/YourWallet';
 
 
 import { AccountsProvider } from './components/AccountsContext';
+import History from './components/History';
 const Stack = createStackNavigator();
 
 const App: React.FC = (): React.ReactElement | null => {
@@ -138,6 +132,11 @@ const App: React.FC = (): React.ReactElement | null => {
         <Stack.Screen
           name="CreatePassword"
           component={CreatePassword}
+          options={{headerShown: false}}
+        />
+         <Stack.Screen
+          name="History"
+          component={History}
           options={{headerShown: false}}
         />
         <Stack.Screen
