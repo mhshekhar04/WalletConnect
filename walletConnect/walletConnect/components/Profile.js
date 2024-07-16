@@ -504,14 +504,9 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderTopWidth: 1,
     borderTopColor: '#333',
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    backgroundColor: '#1C1C1C',
   },
   footerButton: {
     alignItems: 'center',
-    flex: 1,
   },
   footerButtonText: {
     color: '#FFF',
@@ -524,7 +519,6 @@ const styles = StyleSheet.create({
 });
 
 export default Profile;
-
 
 
 // import React, {useState, useEffect, useRef} from 'react';
