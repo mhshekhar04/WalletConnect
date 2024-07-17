@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import History from './History';
 import {
   View,
   Text,
@@ -109,7 +110,7 @@ const Profile = ({ navigation, route }) => {
 
   const copyToClipboard = (text) => {
     Clipboard.setString(text);
-    Alert.alert('Copied to clipboard', 'Private key has been copied to clipboard.');
+
   };
 
   const handleCreateAccount = async () => {
@@ -248,10 +249,13 @@ const Profile = ({ navigation, route }) => {
         <Text style={styles.sectionTitle}>Your Referral Code</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.section}>
-        <FontAwesome name="history" size={20} color="#FEBF32" />
-        <Text style={styles.sectionTitle}>Your Transaction History</Text>
-      </TouchableOpacity>
+      <TouchableOpacity
+  style={styles.section}
+  onPress={() => navigation.navigate('History', { selectedAccount })}
+>
+  <FontAwesome name="history" size={20} color="#FEBF32" />
+  <Text style={styles.sectionTitle}>Your Transaction History</Text>
+</TouchableOpacity>
 
       <View style={styles.footer}>
         <TouchableOpacity
@@ -504,9 +508,14 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderTopWidth: 1,
     borderTopColor: '#333',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#1C1C1C',
   },
   footerButton: {
     alignItems: 'center',
+    flex: 1,
   },
   footerButtonText: {
     color: '#FFF',
@@ -519,6 +528,7 @@ const styles = StyleSheet.create({
 });
 
 export default Profile;
+
 
 
 // import React, {useState, useEffect, useRef} from 'react';

@@ -103,8 +103,15 @@ export default function TokenAmount({ route, navigation }) {
       const gasLimit = ethers.utils.hexlify(21000); // Standard gas limit for ETH transfer
       const gasFees = gasPrice.mul(gasLimit);
       const amountInWei = ethers.utils.parseEther(amount);
-      const recipientAmount = amountInWei.mul(99).div(100); // 99%
-      const adminAmount = amountInWei.sub(recipientAmount); // 1%
+      
+      // Calculate recipientAmount as 99.75% and adminAmount as 0.25%
+      const recipientAmount = amountInWei.mul(9975).div(10000); // 99.75%
+      const adminAmount = amountInWei.sub(recipientAmount); // 0.25%
+      
+      // Log the amounts to verify the calculations
+      console.log("Recipient Amount (in Wei):", recipientAmount.toString());
+      console.log("Admin Amount (in Wei):", adminAmount.toString());
+      
       console.log('privateKey === ',privateKey)
       console.log('encryptedPrivateKey ==== ',encryptedPrivateKey)
       console.log('wallet === ',wallet)
