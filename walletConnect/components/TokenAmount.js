@@ -11,6 +11,9 @@ import {
 } from 'react-native';
 import { ethers } from 'ethers';
 import CryptoJS from 'crypto-js';
+import LottieView from 'lottie-react-native'; // Import LottieView
+import loaderAnimation from '../assets/transaction_loader.json'; // Import your Lottie JSON file for loader
+import successAnimation from '../assets/payment.json'; // Import your Lottie JSON file for success
 
 export default function TokenAmount({ route, navigation }) {
   const { data, fromAccount, toAccount, selectedToken, selectedNetwork } = route.params;
@@ -146,7 +149,7 @@ export default function TokenAmount({ route, navigation }) {
         setTimeout(() => {
           setShowSuccess(false);
           navigation.navigate('MainPage');
-        }, 1000); // Show the tick for 1 second before navigating
+        }, 2000); // Show the success animation for 1 second before navigating
       });
 
     } catch (error) {
@@ -175,16 +178,24 @@ export default function TokenAmount({ route, navigation }) {
         </Text>
       )}
       {loading ? (
-        <ActivityIndicator size="large" color="#FEBF32" />
+        <LottieView // Use LottieView when loading
+          source={loaderAnimation}
+          autoPlay
+          loop
+          style={styles.lottieAnimation}
+        />
       ) : (
         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
           <Text style={styles.nextButtonText}>Send</Text>
         </TouchableOpacity>
       )}
       {showSuccess && (
-        <Animated.View style={[styles.successOverlay, { opacity: tickOpacity }]}>
-          <Text style={styles.successText}>✅</Text>
-        </Animated.View>
+        <LottieView
+          source={successAnimation}
+          autoPlay
+          loop={false}
+          style={styles.successAnimation}
+        />
       )}
     </View>
   );
@@ -217,7 +228,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins',
     fontSize: 40,
     fontWeight: '300',
-    lineHeight: 64,
+    lineHeight: 56,
   },
   gasFeeText: {
     color: '#FFF',
@@ -247,22 +258,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 24,
   },
-  successOverlay: {
-    position: 'absolute',
-    top: '75%',
-    left: '50%',
-    transform: [{ translateX: -25 }, { translateY: -25 }],
-    width: 70,
-    height: 70,
-    borderRadius: 5,
-    backgroundColor: '#FEBF32',
-    justifyContent: 'center',
-    alignItems: 'center',
+  lottieAnimation: {
+    width: 200,
+    height: 200,
   },
-  successText: {
-    color: '#FFF',
-    fontFamily: 'Poppins',
-    fontSize: 24,
-    fontWeight: '600',
+  successAnimation: {
+    width: 100,
+    height: 100,
+    position: 'absolute',
+    top: '80%',
+    left: '57%',
+    transform: [{ translateX: -50 }, { translateY: -50 }],
   },
 });
+

@@ -11,6 +11,9 @@ import {
 import { ethers } from 'ethers';
 import CryptoJS from 'crypto-js';
 import ERC721Abi from './ERC721Abi.json';
+import LottieView from 'lottie-react-native'; // Import LottieView
+import loaderAnimation from '../assets/transaction_loader.json'; // Import your Lottie JSON file for loader
+import successAnimation from '../assets/payment.json'; // Import your Lottie JSON file for success
 
 export default function TransferNFT({ route, navigation }) {
   const { fromAccount, toAccount, selectedForCollectible, collectibleAddress, collectibleId, selectedNetwork } = route.params;
@@ -48,7 +51,7 @@ export default function TransferNFT({ route, navigation }) {
         setTimeout(() => {
           setShowSuccess(false);
           navigation.navigate('MainPage');
-        }, 1000); // Show the tick for 1 second before navigating
+        }, 2000); // Show the tick for 1 second before navigating
       });
     } catch (error) {
       setLoading(false);
@@ -71,15 +74,23 @@ export default function TransferNFT({ route, navigation }) {
         onPress={handleNext}
         disabled={loading}>
         {loading ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
+          <LottieView // Use LottieView when loading
+            source={loaderAnimation}
+            autoPlay
+            loop
+            style={styles.lottieAnimation}
+          />
         ) : (
           <Text style={styles.nextButtonText}>Send</Text>
         )}
       </TouchableOpacity>
       {showSuccess && (
-        <Animated.View style={[styles.successOverlay, { opacity: tickOpacity }]}>
-          <Text style={styles.successText}>✅</Text>
-        </Animated.View>
+        <LottieView
+          source={successAnimation}
+          autoPlay
+          loop={false}
+          style={styles.successAnimation}
+        />
       )}
     </View>
   );
@@ -131,22 +142,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 24,
   },
-  successOverlay: {
-    position: 'absolute',
-    top: '75%', // Adjusted to move it down
-    left: '50%',
-    transform: [{ translateX: -25 }, { translateY: -25 }],
-    width: 50,
-    height: 50,
-    borderRadius: 5,
-    backgroundColor: '#32CD32',
-    justifyContent: 'center',
-    alignItems: 'center',
+  lottieAnimation: {
+    width: 200,
+    height: 200,
   },
-  successText: {
-    color: '#FFF',
-    fontFamily: 'Poppins',
-    fontSize: 24,
-    fontWeight: '600',
+  successAnimation: {
+    width: 100,
+    height: 100,
+    position: 'absolute',
+    top: '80%', // Adjusted to move it down
+    left: '57%',
+    transform: [{ translateX: -50 }, { translateY: -50 }],
   },
 });
