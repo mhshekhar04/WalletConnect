@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 import { ethers } from 'ethers';
 import CryptoJS from 'crypto-js';
@@ -18,6 +19,8 @@ export default function TokenAmount({ route, navigation }) {
   const [gasFee, setGasFee] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fetchingGasFee, setFetchingGasFee] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const tickOpacity = useState(new Animated.Value(0))[0];
   const adminWalletAddress = '0x41956fdADAe085BCABF9a1e085EE5c246Eb82b44';
 
   console.log("selectedNetwork ==== ", selectedNetwork);
@@ -132,11 +135,20 @@ export default function TokenAmount({ route, navigation }) {
       const txResponse2 = await wallet.sendTransaction(tx2);
       const txReceipt1 = await txResponse1.wait();
       const txReceipt2 = await txResponse2.wait();
-      // Navigate to the success screen with the transaction details and gas fees
-      navigation.navigate('MainPage', {
-        // txReceipt: txReceipt1,
-        // gasFees: ethers.utils.formatEther(gasFees),
+
+      // Show success animation
+      setShowSuccess(true);
+      Animated.timing(tickOpacity, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      }).start(() => {
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigation.navigate('MainPage');
+        }, 1000); // Show the tick for 1 second before navigating
       });
+
     } catch (error) {
       Alert.alert('Transaction Failed', error.message);
     } finally {
@@ -169,6 +181,11 @@ export default function TokenAmount({ route, navigation }) {
           <Text style={styles.nextButtonText}>Send</Text>
         </TouchableOpacity>
       )}
+      {showSuccess && (
+        <Animated.View style={[styles.successOverlay, { opacity: tickOpacity }]}>
+          <Text style={styles.successText}>✅</Text>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -196,16 +213,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 20,
     textAlign: 'center',
-    color: '#FFF',
+    color: '#FEBF32',
     fontFamily: 'Poppins',
     fontSize: 40,
     fontWeight: '300',
     lineHeight: 64,
-    // Adding a gradient text color
-    background: 'linear-gradient(91deg, #A9CDFF, #72F6D1, #A0ED8D, #FED365, #FAA49E)',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
   },
   gasFeeText: {
     color: '#FFF',
@@ -235,5 +247,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 24,
   },
+  successOverlay: {
+    position: 'absolute',
+    top: '75%',
+    left: '50%',
+    transform: [{ translateX: -25 }, { translateY: -25 }],
+    width: 70,
+    height: 70,
+    borderRadius: 5,
+    backgroundColor: '#FEBF32',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successText: {
+    color: '#FFF',
+    fontFamily: 'Poppins',
+    fontSize: 24,
+    fontWeight: '600',
+  },
 });
-

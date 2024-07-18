@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert, ActivityIndicator, Animated } from 'react-native';
 import { ethers } from 'ethers';
 import CryptoJS from 'crypto-js';
 
@@ -10,6 +10,8 @@ export default function TransferToken({ route, navigation }) {
   const [gasFee, setGasFee] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fetchingGasFee, setFetchingGasFee] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const tickOpacity = useState(new Animated.Value(0))[0];
 
   const selectedToken = {
     tokenAddress,
@@ -176,13 +178,24 @@ export default function TransferToken({ route, navigation }) {
   
       const txReceipt1 = await tx1.wait();
       const txReceipt2 = await tx2.wait();
-  
-      navigation.navigate('MainPage', {
-        amount: ethers.utils.formatUnits(amountInWei, decimals),
-        gasFee: gasFee,
-        fromAddress: fromAccount.address,
-        toAddress: toAccount.address,
-        tokenBalance: ethers.utils.formatUnits(tokenBalance, decimals) // Adjusted based on token decimals
+
+      // Show success animation
+      setShowSuccess(true);
+      Animated.timing(tickOpacity, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      }).start(() => {
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigation.navigate('MainPage', {
+            amount: ethers.utils.formatUnits(amountInWei, decimals),
+            gasFee: gasFee,
+            fromAddress: fromAccount.address,
+            toAddress: toAccount.address,
+            tokenBalance: ethers.utils.formatUnits(tokenBalance, decimals)
+          });
+        }, 1000); // Show the tick for 1 second before navigating
       });
     } catch (error) {
       console.error("Transaction Error:", error);
@@ -191,7 +204,6 @@ export default function TransferToken({ route, navigation }) {
       setLoading(false);
     }
   };
-  
 
   return (
     <View style={styles.container}>
@@ -217,6 +229,11 @@ export default function TransferToken({ route, navigation }) {
         </TouchableOpacity>
       )}
       <Text style={styles.balanceText}>Balance: {balance} SepoliaETH</Text>
+      {showSuccess && (
+        <Animated.View style={[styles.successOverlay, { opacity: tickOpacity }]}>
+          <Text style={styles.successText}>✅</Text>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -265,6 +282,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
     backgroundColor: '#FEBF32',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   nextButtonText: {
     color: '#17171A',
@@ -278,5 +300,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '400',
     marginTop: 20,
+  },
+  successOverlay: {
+    position: 'absolute',
+    top: '75%', // Adjusted to move it down
+    left: '50%',
+    transform: [{ translateX: -25 }, { translateY: -25 }],
+    width: 50,
+    height: 50,
+    borderRadius: 5,
+    backgroundColor: '#32CD32',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successText: {
+    color: '#FFF',
+    fontFamily: 'Poppins',
+    fontSize: 24,
+    fontWeight: '600',
   },
 });

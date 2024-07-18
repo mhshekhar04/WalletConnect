@@ -19,7 +19,7 @@ const VerifiedSeedPhrase = () => {
         You've successfully protected your wallet. Remember to keep your seed phrase safe, it's your responsibility!
       </Text>
       <Text style={styles.description}>
-        DefiSquid cannot recover your wallet should you lose it. You can find your seedphrase in Settings {">"} Security & Privacy.
+      "Navigator cannot recover your wallet if you lose it."
       </Text>
       <TouchableOpacity style={styles.verifyButton} onPress={mainPage}>
         <Text style={styles.buttonText}>Next</Text>

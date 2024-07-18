@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 import { ethers } from 'ethers';
 import CryptoJS from 'crypto-js';
@@ -14,6 +15,8 @@ import ERC721Abi from './ERC721Abi.json';
 export default function TransferNFT({ route, navigation }) {
   const { fromAccount, toAccount, selectedForCollectible, collectibleAddress, collectibleId, selectedNetwork } = route.params;
   const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const tickOpacity = useState(new Animated.Value(0))[0];
 
   const decryptPrivateKey = (encryptedPrivateKey) => {
     const bytes = CryptoJS.AES.decrypt(encryptedPrivateKey, 'your-secret-key');
@@ -34,9 +37,19 @@ export default function TransferNFT({ route, navigation }) {
       );
       const receipt = await tx.wait();
       setLoading(false);
-      navigation.navigate('MainPage', 
-        // {txReceipt: receipt}
-      );
+
+      // Show success animation
+      setShowSuccess(true);
+      Animated.timing(tickOpacity, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      }).start(() => {
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigation.navigate('MainPage');
+        }, 1000); // Show the tick for 1 second before navigating
+      });
     } catch (error) {
       setLoading(false);
       Alert.alert('Transaction Failed', error.message);
@@ -63,6 +76,11 @@ export default function TransferNFT({ route, navigation }) {
           <Text style={styles.nextButtonText}>Send</Text>
         )}
       </TouchableOpacity>
+      {showSuccess && (
+        <Animated.View style={[styles.successOverlay, { opacity: tickOpacity }]}>
+          <Text style={styles.successText}>✅</Text>
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -100,12 +118,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
     backgroundColor: '#FEBF32',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   nextButtonText: {
-    color: '#000',
+    color: '#17171A',
     fontFamily: 'Poppins',
     fontSize: 16,
     fontWeight: '600',
     lineHeight: 24,
+  },
+  successOverlay: {
+    position: 'absolute',
+    top: '75%', // Adjusted to move it down
+    left: '50%',
+    transform: [{ translateX: -25 }, { translateY: -25 }],
+    width: 50,
+    height: 50,
+    borderRadius: 5,
+    backgroundColor: '#32CD32',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successText: {
+    color: '#FFF',
+    fontFamily: 'Poppins',
+    fontSize: 24,
+    fontWeight: '600',
   },
 });

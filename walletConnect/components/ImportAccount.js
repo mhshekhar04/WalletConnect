@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -7,37 +7,18 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-
 import RNSecureStorage from 'rn-secure-storage';
 import { ethers } from 'ethers';
 import CryptoJS from 'crypto-js';
-
+import { AccountsContext } from './AccountsContext';  // Import the context
 const ImportAccount = ({ navigation }) => {
   const [privateKey, setPrivateKey] = useState('');
   const [loading, setLoading] = useState(false);
-  const [importedAccounts, setImportedAccounts] = useState([]);
-
-  useEffect(() => {
-    fetchImportedAccounts();
-  }, []);
-
-  const fetchImportedAccounts = async () => {
-    try {
-      const storedAccounts = await RNSecureStorage.getItem('new accounts');
-      if (storedAccounts) {
-        const accounts = JSON.parse(storedAccounts);
-        setImportedAccounts(accounts);
-      }
-    } catch (error) {
-      console.error('Error fetching imported accounts:', error);
-    }
-  };
-
+  const { addAccount } = useContext(AccountsContext);  // Use the context
   const decryptPrivateKey = (encryptedPrivateKey) => {
     const bytes = CryptoJS.AES.decrypt(encryptedPrivateKey, 'your-secret-key');
     return bytes.toString(CryptoJS.enc.Utf8);
   };
-
   const handleImport = async () => {
     setLoading(true);
     try {
@@ -46,9 +27,7 @@ const ImportAccount = ({ navigation }) => {
         setLoading(false);
         return;
       }
-
       let keyToUse = privateKey;
-
       // Check if privateKey is encrypted and decrypt if necessary
       if (!ethers.utils.isHexString(privateKey)) {
         keyToUse = decryptPrivateKey(privateKey);
@@ -58,20 +37,16 @@ const ImportAccount = ({ navigation }) => {
           return;
         }
       }
-
       const wallet = new ethers.Wallet(keyToUse);
       let storedAccounts = await RNSecureStorage.getItem('new accounts');
       storedAccounts = storedAccounts ? JSON.parse(storedAccounts) : [];
-
       // Find the highest existing account number
       const accountNumbers = storedAccounts
         .filter(account => account.name.startsWith('Imported Account'))
         .map(account => parseInt(account.name.replace('Imported Account ', ''), 10))
         .filter(number => !isNaN(number));
-
       const highestAccountNumber = accountNumbers.length > 0 ? Math.max(...accountNumbers) : 0;
       const newAccountNumber = highestAccountNumber + 1;
-
       const newAccount = {
         name: `Imported Account ${newAccountNumber}`,
         address: wallet.address,
@@ -79,18 +54,11 @@ const ImportAccount = ({ navigation }) => {
           keyToUse,
           'your-secret-key',
         ).toString(),
-        imported: true,  // Add the imported flag here
+        imported: true,
       };
-
-      const updatedAccounts = [...storedAccounts, newAccount];
-
-      await RNSecureStorage.setItem('new accounts', JSON.stringify(updatedAccounts));
-
+      await addAccount(newAccount);  // Add the new account using context
       Alert.alert('Success', 'Account imported and stored successfully');
-      setImportedAccounts(updatedAccounts);
-      console.log('updatedAccounts', updatedAccounts);
       navigation.navigate('MainPage');
-
       // Reset private key input after successful import
       setPrivateKey('');
     } catch (error) {
@@ -100,7 +68,6 @@ const ImportAccount = ({ navigation }) => {
       setLoading(false);
     }
   };
-
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Import Account</Text>
@@ -129,7 +96,6 @@ const ImportAccount = ({ navigation }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
