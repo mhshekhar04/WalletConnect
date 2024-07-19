@@ -280,7 +280,7 @@ export default function WalletSetup() {
       <TouchableOpacity
         style={styles.buttonYellow}
         onPress={() => navigation.navigate('CreatePassword')}>
-        <Text style={styles.buttonYellowText}>Create a New Wallet</Text>
+        <Text style={styles.buttonYellowText}>Create a New Waaallet</Text>
       </TouchableOpacity>
 
       {/* <TouchableOpacity
