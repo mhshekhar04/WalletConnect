@@ -25,7 +25,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import SecureStorage from 'rn-secure-storage';
 import RNSecureStorage from 'rn-secure-storage';
 import { AccountsContext } from './AccountsContext';
-
+//newww
 export default function MainPage({ navigation, route }) {
   const { accounts, generateNewAccounts, addAccount } = useContext(AccountsContext);
   const [selectedTab, setSelectedTab] = useState('Tokens');
