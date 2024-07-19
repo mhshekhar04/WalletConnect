@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert, ActivityIndicator, Animated } from 'react-native';
 import { ethers } from 'ethers';
 import CryptoJS from 'crypto-js';
+import LottieView from 'lottie-react-native'; // Import LottieView
+import loaderAnimation from '../assets/transaction_loader.json'; // Import your Lottie JSON file for loader
+import successAnimation from '../assets/payment.json'; // Import your Lottie JSON file for success
 
 export default function TransferToken({ route, navigation }) {
   const { fromAccount, toAccount, tokenAddress, selectedNetwork } = route.params;
@@ -10,6 +13,8 @@ export default function TransferToken({ route, navigation }) {
   const [gasFee, setGasFee] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fetchingGasFee, setFetchingGasFee] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const tickOpacity = useState(new Animated.Value(0))[0];
 
   const selectedToken = {
     tokenAddress,
@@ -176,13 +181,24 @@ export default function TransferToken({ route, navigation }) {
   
       const txReceipt1 = await tx1.wait();
       const txReceipt2 = await tx2.wait();
-  
-      navigation.navigate('MainPage', {
-        amount: ethers.utils.formatUnits(amountInWei, decimals),
-        gasFee: gasFee,
-        fromAddress: fromAccount.address,
-        toAddress: toAccount.address,
-        tokenBalance: ethers.utils.formatUnits(tokenBalance, decimals) // Adjusted based on token decimals
+
+      // Show success animation
+      setShowSuccess(true);
+      Animated.timing(tickOpacity, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      }).start(() => {
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigation.navigate('MainPage', {
+            amount: ethers.utils.formatUnits(amountInWei, decimals),
+            gasFee: gasFee,
+            fromAddress: fromAccount.address,
+            toAddress: toAccount.address,
+            tokenBalance: ethers.utils.formatUnits(tokenBalance, decimals)
+          });
+        }, 2000); // Show the tick for 1 second before navigating
       });
     } catch (error) {
       console.error("Transaction Error:", error);
@@ -191,7 +207,6 @@ export default function TransferToken({ route, navigation }) {
       setLoading(false);
     }
   };
-  
 
   return (
     <View style={styles.container}>
@@ -210,13 +225,26 @@ export default function TransferToken({ route, navigation }) {
         <Text style={styles.gasFeeText}>Gas Fee: {gasFee ? `${gasFee} ETH` : 'N/A'}</Text>
       )}
       {loading ? (
-        <ActivityIndicator size="large" color="#FEBF32" />
+        <LottieView // Use LottieView when loading
+          source={loaderAnimation}
+          autoPlay
+          loop
+          style={styles.lottieAnimation}
+        />
       ) : (
         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
           <Text style={styles.nextButtonText}>Send</Text>
         </TouchableOpacity>
       )}
       <Text style={styles.balanceText}>Balance: {balance} SepoliaETH</Text>
+      {showSuccess && (
+        <LottieView
+          source={successAnimation}
+          autoPlay
+          loop={false}
+          style={styles.successAnimation}
+        />
+      )}
     </View>
   );
 }
@@ -248,7 +276,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins',
     fontSize: 40,
     fontWeight: '300',
-    lineHeight: 64,
+    lineHeight: 56,
   },
   gasFeeText: {
     color: '#FFF',
@@ -265,6 +293,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
     backgroundColor: '#FEBF32',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   nextButtonText: {
     color: '#17171A',
@@ -278,5 +311,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '400',
     marginTop: 20,
+  },
+  lottieAnimation: {
+    width: 200,
+    height: 200,
+  },
+  successAnimation: {
+    width: 100,
+    height: 100,
+    position: 'absolute',
+    top: '80%', // Adjusted to move it down
+    left: '57%',
+    transform: [{ translateX: -50 }, { translateY: -50 }],
   },
 });

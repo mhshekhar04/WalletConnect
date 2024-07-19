@@ -1,32 +1,25 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Platform} from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {RNCamera} from 'react-native-camera';
-import {useNavigation} from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { RNCamera } from 'react-native-camera';
+import { useNavigation } from '@react-navigation/native';
 import * as Permissions from 'react-native-permissions';
-
-export default function Scanner({route}) {
+export default function Scanner({ route }) {
   const navigation = useNavigation();
-  const {fromAccount, selectedNetwork} = route.params; // Get fromAccount from route params
-  const [scanning, setScanning] = useState(false);
-
+  const { fromAccount, selectedNetwork } = route.params; // Get fromAccount from route params
+  const [hasPermission, setHasPermission] = useState(null);
   useEffect(() => {
     requestCameraPermission();
   }, []);
-
   const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
-      const granted = await Permissions.request(
-        Permissions.PERMISSIONS.ANDROID.CAMERA,
-      );
-      if (granted !== Permissions.RESULTS.GRANTED) {
-        console.log('Camera permission denied');
-        return;
-      }
+      const result = await Permissions.request(Permissions.PERMISSIONS.ANDROID.CAMERA);
+      setHasPermission(result === Permissions.RESULTS.GRANTED);
+    } else {
+      const result = await Permissions.request(Permissions.PERMISSIONS.IOS.CAMERA);
+      setHasPermission(result === Permissions.RESULTS.GRANTED);
     }
   };
-
-  const handleScan = ({data}) => {
+  const handleBarCodeRead = ({ data }) => {
     console.log('Scanned QR code data:', data);
     navigation.navigate('SendToken', {
       recipientAddress: data,
@@ -34,35 +27,28 @@ export default function Scanner({route}) {
       selectedNetwork,
     }); // Navigate back with scanned data
   };
-
-  const startScan = () => {
-    setScanning(true);
-  };
-
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
   return (
     <View style={styles.container}>
-      {scanning ? (
-        <RNCamera
-          style={styles.camera}
-          onBarCodeRead={handleScan}
-          captureAudio={false}
-          androidCameraPermissionOptions={{
-            title: 'Permission to use camera',
-            message: 'We need your permission to use your camera',
-            buttonPositive: 'Ok',
-            buttonNegative: 'Cancel',
-          }}
-        />
-      ) : (
-        <TouchableOpacity style={styles.scanButton} onPress={startScan}>
-          <FontAwesome name="qrcode" size={120} color="#FEBF32" />
-        </TouchableOpacity>
-      )}
-      <Text style={styles.text}>Scan QR Code</Text>
+      <RNCamera
+        style={styles.camera}
+        onBarCodeRead={handleBarCodeRead}
+        captureAudio={false}
+        androidCameraPermissionOptions={{
+          title: 'Permission to use camera',
+          message: 'We need your permission to use your camera',
+          buttonPositive: 'Ok',
+          buttonNegative: 'Cancel',
+        }}
+      />
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -90,3 +76,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
+
+
+
+

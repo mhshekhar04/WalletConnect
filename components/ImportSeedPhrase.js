@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,25 +9,23 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 import SecureStorage from 'rn-secure-storage';
 import CryptoJS from 'crypto-js';
+import debounce from 'lodash.debounce';
+import LottieView from 'lottie-react-native';
 
-const ImportSeedPhrase = ({navigation}) => {
+const ImportSeedPhrase = ({ navigation }) => {
   const [seedPhrase, setSeedPhrase] = useState(new Array(12).fill(''));
   const [isVerified, setIsVerified] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null);
-  const [newAccountName, setNewAccountName] = useState('');
-  const [showAccountModal, setShowAccountModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const checkSeedPhraseVerified = async () => {
       try {
-        const seedPhraseVerified = await SecureStorage.getItem(
-          'seedPhraseVerified',
-        );
+        const seedPhraseVerified = await SecureStorage.getItem('seedPhraseVerified');
         if (seedPhraseVerified) {
           navigation.replace('VerifiedSeedPhrase');
         }
@@ -45,66 +43,70 @@ const ImportSeedPhrase = ({navigation}) => {
     setSeedPhrase(newSeedPhrase);
   };
 
+  const debouncedVerifySeedPhrase = useCallback(
+    debounce(async (mnemonic) => {
+      try {
+        const start1 = Date.now();
+        const isValid = ethers.utils.isValidMnemonic(mnemonic);
+        const end1 = Date.now();
+        console.log('Time taken for isValidMnemonic:', (end1 - start1) / 1000, 'seconds');
+
+        if (isValid) {
+          setIsVerified(true);
+
+          const start2 = Date.now();
+          const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+          const end2 = Date.now();
+          console.log('Time taken for HDNode.fromMnemonic:', (end2 - start2) / 1000, 'seconds');
+
+          const start3 = Date.now();
+          const newAccounts = [];
+          for (let i = 0; i < 25; i++) {
+            const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${i}`);
+            const newAccount = {
+              name: `Account ${accounts.length + i + 1}`,
+              address: childNode.address,
+              encryptedPrivateKey: CryptoJS.AES.encrypt(
+                childNode.privateKey,
+                'your-secret-key',
+              ).toString(),
+            };
+            newAccounts.push(newAccount);
+          }
+          const updatedAccounts = [...accounts, ...newAccounts];
+          setAccounts(updatedAccounts);
+          const end3 = Date.now();
+          console.log('Time taken for generating accounts:', (end3 - start3) / 1000, 'seconds');
+
+          const start4 = Date.now();
+          await SecureStorage.setItem('accounts', JSON.stringify(updatedAccounts));
+          await SecureStorage.setItem('seedPhraseVerified', 'true');
+          const end4 = Date.now();
+          console.log('Time taken for saving to SecureStorage:', (end4 - start4) / 1000, 'seconds');
+
+          setSelectedAccount(newAccounts[0]);
+          Alert.alert('Verification passed', 'Seed phrase is verified by ethers.js');
+          navigation.replace('VerifiedSeedPhrase');
+        } else {
+          setIsVerified(false);
+          Alert.alert('Verification Failed', 'Seed phrase not verified by ethers.js');
+        }
+      } catch (error) {
+        console.error('Error verifying seed phrase:', error);
+        setIsVerified(false);
+        Alert.alert('Verification Failed', 'An error occurred while verifying seed phrase');
+      } finally {
+        setLoading(false);
+      }
+    }, 500),
+    [accounts, navigation]
+  );
+
   const verifySeedPhrase = async () => {
     setLoading(true);
-    try {
-      const mnemonic = seedPhrase.join(' ');
-      const isValid = ethers.utils.isValidMnemonic(mnemonic);
-      setLoading(true);
-
-      if (isValid) {
-        setIsVerified(true);
-        const rootNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
-
-        const newAccounts = [];
-        for (let i = 0; i < 25; i++) {
-          const childNode = rootNode.derivePath(`m/44'/60'/0'/0/${i}`);
-          const newAccount = {
-            name: `Account ${accounts.length + i + 1}`,
-            address: childNode.address,
-            encryptedPrivateKey: CryptoJS.AES.encrypt(
-              childNode.privateKey,
-              'your-secret-key',
-            ).toString(),
-          };
-          setLoading(true);
-          newAccounts.push(newAccount);
-        }
-
-        const updatedAccounts = [...accounts, ...newAccounts];
-        setAccounts(updatedAccounts);
-        await SecureStorage.setItem(
-          'accounts',
-          JSON.stringify(updatedAccounts),
-        );
-        setNewAccountName('');
-        setShowAccountModal(false);
-        setSelectedAccount(newAccounts[0]);
-        await SecureStorage.setItem('seedPhraseVerified', 'true');
-        Alert.alert(
-          'Verification passed',
-          'Seed phrase is verified by ethers.js',
-        );
-        navigation.replace('VerifiedSeedPhrase');
-      } else {
-        setIsVerified(false);
-        Alert.alert(
-          'Verification Failed',
-          'Seed phrase not verified by ethers.js',
-        );
-      }
-    } catch (error) {
-      console.error('Error verifying seed phrase:', error);
-      setIsVerified(false);
-      Alert.alert(
-        'Verification Failed',
-        'An error occurred while verifying seed phrase',
-      );
-    } finally {
-      setLoading(false);
-    }
+    const mnemonic = seedPhrase.join(' ');
+    debouncedVerifySeedPhrase(mnemonic);
   };
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.rectanglesContainer}>
@@ -129,7 +131,29 @@ const ImportSeedPhrase = ({navigation}) => {
         ))}
       </View>
       {loading ? (
-        <ActivityIndicator size="large" color="#FEBF32" />
+        <View style={styles.animationContainer}>
+          
+        <LottieView
+            source={require('../assets/loading.json')}
+            autoPlay
+            loop
+            style={styles.lottieAnimation}
+            colorFilters={[
+              {
+                keypath: 'Shape Layer 1',
+                color: '#FEBF32',
+              },
+              {
+                keypath: 'Shape Layer 2',
+                color: '#FEBF32',
+              },
+              {
+                keypath: 'Shape Layer 3',
+                color: '#FEBF32',
+              },
+            ]}
+          />
+        </View>
       ) : (
         <TouchableOpacity
           style={styles.verifyButton}
@@ -191,6 +215,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '400',
     lineHeight: 24,
+  },
+  animationContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lottieAnimation: {
+    width: 150,
+    height: 150,
   },
   verifyButton: {
     width: '100%',

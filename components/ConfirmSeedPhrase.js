@@ -61,7 +61,7 @@ const ConfirmSeedPhrase = ({navigation, route}) => {
             await SecureStorage.setItem('accounts', JSON.stringify(updatedAccounts));
             await SecureStorage.setItem('seedPhraseVerified', 'true');
             
-            Alert.alert('Verification passed', 'Seed phrase is verified by ethers.js');
+        
             navigation.replace('SuccessSeedPhrase');
           } else {
             Alert.alert('Verification failed', 'Seed phrase is not verified by ethers.js');

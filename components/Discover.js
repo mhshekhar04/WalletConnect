@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-const dexLinks = [
-  { name: '1inch.io', url: 'https://1inch.io' },
-  { name: 'Curve', url: 'https://curve.fi' },
-  { name: 'Pancakeswap', url: 'https://pancakeswap.finance' },
-  { name: 'Aerodrome', url: 'https://aerodrome.com' },
-  { name: 'Gmx', url: 'https://gmx.io' },
-];
 
+
+const dexLinks = [
+  { name: '1inch.io', url: 'https://app.1inch.io/#/1/swap/ETH/DAI' },
+  { name: 'Curve', url: 'https://curve.fi/#/ethereum/swap' },
+  { name: 'Pancakeswap', url: 'https://pancakeswap.finance/swap' },
+  { name: 'Aerodrome', url: 'https://aerodrome.finance/swap' }, // Updated the URL
+  { name: 'Gmx', url: 'https://app.gmx.io/#/trade' },
+
+];
 export default function Discover({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
 

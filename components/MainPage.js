@@ -567,12 +567,18 @@ export default function MainPage({ navigation, route }) {
       <TouchableOpacity
         style={styles.accountButton}
         onPress={() => setShowAccountModal(true)}>
-        <Text style={styles.accountButtonText}>{selectedAccount?.name}</Text>
+        
+        <Text style={styles.accountButtonText}>{selectedAccount?.name ? selectedAccount?.name:'Create account'}</Text>
         <FontAwesome name="chevron-down" size={12} color="#FFF" />
       </TouchableOpacity>
 
       <View style={styles.balanceTextWrapper}>
-        <Text style={styles.balanceText}>{balance && !isNaN(parseFloat(balance)) ? parseFloat(balance).toFixed(4) : '0.0000'} {selectedNetwork?.suffix}</Text>
+        <Text style={styles.balanceText}>
+          {balance && !isNaN(parseFloat(balance))
+            ? parseFloat(balance).toFixed(4)
+            : '0.0000'}
+          {selectedNetwork?.suffix}
+        </Text>
       </View>
 
       <View style={styles.buttonRow}>
@@ -877,12 +883,17 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   balanceText: {
+    color: '#A0ED8D',
     fontVariantNumeric: 'lining-nums proportional-nums',
     fontFamily: 'Poppins',
     fontSize: 40,
     fontStyle: 'normal',
+    marginLeft: 20,
     fontWeight: '300',
-    color: '#FEBF32',
+    lineHeight: 56,
+    backgroundClip: 'text',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
   },
   buttonRow: {
     flexDirection: 'row',
@@ -1047,6 +1058,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 });
+
 
 // const styles = StyleSheet.create({
 //   container: {

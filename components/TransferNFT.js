@@ -6,14 +6,20 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 import { ethers } from 'ethers';
 import CryptoJS from 'crypto-js';
 import ERC721Abi from './ERC721Abi.json';
+import LottieView from 'lottie-react-native'; // Import LottieView
+import loaderAnimation from '../assets/transaction_loader.json'; // Import your Lottie JSON file for loader
+import successAnimation from '../assets/payment.json'; // Import your Lottie JSON file for success
 
 export default function TransferNFT({ route, navigation }) {
   const { fromAccount, toAccount, selectedForCollectible, collectibleAddress, collectibleId, selectedNetwork } = route.params;
   const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const tickOpacity = useState(new Animated.Value(0))[0];
 
   const decryptPrivateKey = (encryptedPrivateKey) => {
     const bytes = CryptoJS.AES.decrypt(encryptedPrivateKey, 'your-secret-key');
@@ -34,9 +40,19 @@ export default function TransferNFT({ route, navigation }) {
       );
       const receipt = await tx.wait();
       setLoading(false);
-      navigation.navigate('MainPage', 
-        // {txReceipt: receipt}
-      );
+
+      // Show success animation
+      setShowSuccess(true);
+      Animated.timing(tickOpacity, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      }).start(() => {
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigation.navigate('MainPage');
+        }, 2000); // Show the tick for 1 second before navigating
+      });
     } catch (error) {
       setLoading(false);
       Alert.alert('Transaction Failed', error.message);
@@ -58,11 +74,24 @@ export default function TransferNFT({ route, navigation }) {
         onPress={handleNext}
         disabled={loading}>
         {loading ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
+          <LottieView // Use LottieView when loading
+            source={loaderAnimation}
+            autoPlay
+            loop
+            style={styles.lottieAnimation}
+          />
         ) : (
           <Text style={styles.nextButtonText}>Send</Text>
         )}
       </TouchableOpacity>
+      {showSuccess && (
+        <LottieView
+          source={successAnimation}
+          autoPlay
+          loop={false}
+          style={styles.successAnimation}
+        />
+      )}
     </View>
   );
 }
@@ -100,12 +129,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
     backgroundColor: '#FEBF32',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   nextButtonText: {
-    color: '#000',
+    color: '#17171A',
     fontFamily: 'Poppins',
     fontSize: 16,
     fontWeight: '600',
     lineHeight: 24,
+  },
+  lottieAnimation: {
+    width: 200,
+    height: 200,
+  },
+  successAnimation: {
+    width: 100,
+    height: 100,
+    position: 'absolute',
+    top: '80%', // Adjusted to move it down
+    left: '57%',
+    transform: [{ translateX: -50 }, { translateY: -50 }],
   },
 });

@@ -75,8 +75,8 @@ const History = ({ route, navigation }) => {
             <Text style={styles.transactionStatus}>{item.isError === "0" ? "Confirmed" : "Cancelled"}</Text>
           </View>
           <View style={styles.transactionAmount}>
-            <Text style={styles.transactionValue}>{parseFloat(valueInEth).toFixed(4)} BNB</Text>
-            <Text style={styles.transactionValueUSD}>${(parseFloat(valueInEth) * 238.2).toFixed(2)}</Text>
+            <Text style={styles.transactionValue}>{parseFloat(valueInEth).toFixed(7)}</Text>
+            <Text style={styles.transactionValueUSD}>${(parseFloat(valueInEth) * 238.2).toFixed(7)}</Text>
           </View>
         </View>
       </View>

@@ -78,7 +78,7 @@ const Profile = ({ navigation, route }) => {
         if (selectedAccount.imported) {
           // For imported accounts, the private key is stored directly
           const privateKeyBytes = CryptoJS.AES.decrypt(
-            selectedAccount.privateKey,
+            selectedAccount.encryptedPrivateKey,
             'your-secret-key'
           );
           decryptedPrivateKey = privateKeyBytes.toString(CryptoJS.enc.Utf8);
