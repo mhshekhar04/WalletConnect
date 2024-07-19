@@ -1,12 +1,12 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
-import Svg, {
-  Text as SvgText,
-  Defs,
-  LinearGradient as SvgLinearGradient,
-  Stop,
-  ClipPath,
-} from 'react-native-svg';
-import { Rect } from 'react-native-svg';
+// import Svg, {
+//   Text as SvgText,
+//   Defs,
+//   LinearGradient as SvgLinearGradient,
+//   Stop,
+//   ClipPath,
+// } from 'react-native-svg';
+// import { Rect } from 'react-native-svg';
 import {
   View,
   Text,
