@@ -1,4 +1,4 @@
-import React, {useContext, useState, useEffect, useRef} from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import Svg, {
   Text as SvgText,
   Defs,
@@ -6,7 +6,7 @@ import Svg, {
   Stop,
   ClipPath,
 } from 'react-native-svg';
-import {Rect} from 'react-native-svg';
+import { Rect } from 'react-native-svg';
 import {
   View,
   Text,
@@ -19,16 +19,15 @@ import {
   Alert,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import SecureStorage from 'rn-secure-storage';
 import RNSecureStorage from 'rn-secure-storage';
-import {AccountsContext} from './AccountsContext';
+import { AccountsContext } from './AccountsContext';
 
-export default function MainPage({navigation, route}) {
-  const {accounts, generateNewAccounts, addAccount} =
-    useContext(AccountsContext);
+export default function MainPage({ navigation, route }) {
+  const { accounts, generateNewAccounts, addAccount } = useContext(AccountsContext);
   const [selectedTab, setSelectedTab] = useState('Tokens');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState(null);
@@ -254,7 +253,7 @@ export default function MainPage({navigation, route}) {
           const parsedTokens = JSON.parse(storedTokens);
 
           const tokenBalances = await Promise.all(
-            parsedTokens.map(async token => {
+            parsedTokens.map(async (token) => {
               try {
                 const contract = new ethers.Contract(
                   token?.address,
@@ -308,7 +307,7 @@ export default function MainPage({navigation, route}) {
         if (storedCollectibles) {
           const parsedCollectibles = JSON.parse(storedCollectibles);
           const collectibleBalances = await Promise.all(
-            parsedCollectibles.map(async coll => {
+            parsedCollectibles.map(async (coll) => {
               const contract = new ethers.Contract(
                 coll.address,
                 abi721,
@@ -363,8 +362,8 @@ export default function MainPage({navigation, route}) {
     setDropdownNetworkVisible(!dropdownNetworkVisible);
   };
 
-  const selectNetwork = networkName => {
-    const selected = networks.find(network => network.name === networkName);
+  const selectNetwork = (networkName) => {
+    const selected = networks.find((network) => network.name === networkName);
     if (selected) {
       setSelectedNetwork(selected);
       setDropdownNetworkVisible(false);
@@ -455,7 +454,7 @@ export default function MainPage({navigation, route}) {
       const nextAccount = parsedAccounts[fetchedAccountIndex];
 
       const accountExists = generateNewAccounts.some(
-        account => account.address === nextAccount.address,
+        (account) => account.address === nextAccount.address,
       );
 
       if (accountExists) {
@@ -473,7 +472,7 @@ export default function MainPage({navigation, route}) {
 
       setTimeout(() => {
         if (scrollViewRef.current) {
-          scrollViewRef.current.scrollToEnd({animated: true});
+          scrollViewRef.current.scrollToEnd({ animated: true });
         }
       }, 100);
     } catch (error) {
@@ -481,18 +480,18 @@ export default function MainPage({navigation, route}) {
     }
   };
 
-  const getBalance = async address => {
+  const getBalance = async (address) => {
     const balance = await provider.getBalance(address);
     return ethers.utils.formatEther(balance);
   };
 
-  const handleAccountSelect = account => {
+  const handleAccountSelect = (account) => {
     setSelectedAccount(account);
     setNewAccountName(account?.name);
     setShowAccountModal(false);
   };
 
-  const onTokenSendClick = token => {
+  const onTokenSendClick = (token) => {
     setSelectedForToken(token);
     navigation.navigate('SendToken', {
       selectedAccount,
@@ -502,7 +501,7 @@ export default function MainPage({navigation, route}) {
     });
   };
 
-  const onNFTSendClick = collectible => {
+  const onNFTSendClick = (collectible) => {
     setSelectedForCollectible(collectible);
     navigation.navigate('SendToken', {
       selectedAccount,
@@ -532,7 +531,7 @@ export default function MainPage({navigation, route}) {
       />
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('Profile', {selectedAccount})}>
+          onPress={() => navigation.navigate('Profile', { selectedAccount })}>
           <Image
             source={require('../assets/girl.png')}
             style={styles.profileImage}
@@ -563,106 +562,23 @@ export default function MainPage({navigation, route}) {
             </View>
           )}
         </TouchableOpacity>
-        {/* <TouchableOpacity
-          style={styles.networkContainer}
-          onPress={toggleNetwokDropdown}>
-          <Text style={styles.networkButtonText}>
-            {selectedNetwork ? selectedNetwork.name : 'Select a network'}
-            <FontAwesome
-              style={styles.downArrow}
-              name="chevron-down"
-              size={12}
-              color="#FFF"
-            />
-          </Text>
-          {dropdownNetworkVisible && (
-            <View style={styles.dropdown}>
-              {networks.map((network, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.dropdownItem}
-                  onPress={() => selectNetwork(network.name)}>
-                  <Text style={styles.networkText}>{network.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </TouchableOpacity> */}
       </View>
 
       <TouchableOpacity
         style={styles.accountButton}
         onPress={() => setShowAccountModal(true)}>
-        <Text style={styles.accountButtonText}>{selectedAccount?.name}</Text>
+        
+        <Text style={styles.accountButtonText}>{selectedAccount?.name ? selectedAccount?.name:'Create account'}</Text>
         <FontAwesome name="chevron-down" size={12} color="#FFF" />
       </TouchableOpacity>
 
       <View style={styles.balanceTextWrapper}>
-        <View style={styles.balanceTextWrapper}>
-          <Text style={styles.buttonText}>{balance && !isNaN(parseFloat(balance)) ? parseFloat(balance).toFixed(4) : '0.0000'}
-          {selectedNetwork?.suffix}</Text>
-          {/* <Svg height="60" width="100%">
-            <Defs>
-              <SvgLinearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <Stop offset="0%" stopColor="#A9CDFF" />
-                <Stop offset="22%" stopColor="#72F6D1" />
-                <Stop offset="56%" stopColor="#A0ED8D" />
-                <Stop offset="82%" stopColor="#FED365" />
-                <Stop offset="100%" stopColor="#FAA49E" />
-              </SvgLinearGradient>
-              <ClipPath id="clip">
-                <SvgText
-                  x="30%"
-                y="40"
-                  textAnchor="middle"
-                  fontFamily="Poppins"
-                  fontSize="40"
-                  fontWeight="300">
-                 {balance && !isNaN(parseFloat(balance)) ? parseFloat(balance).toFixed(4) : '0.0000'}
-                 {selectedNetwork?.suffix}
-                 
-                 {parseFloat(balance).toFixed(4)}{selectedNetwork?.suffix}
-                </SvgText>
-              </ClipPath>
-            </Defs>
-            <Rect
-              width="100%"
-              height="100%"
-              fill="url(#grad)"
-              clipPath="url(#clip)"
-            />
-          </Svg> */}
-        </View>
-
-        {/* <Svg height="60" width="100%">
-          <Defs>
-            <SvgLinearGradient x1="0%" y1="0%" x2="100%" y2="0%">
-              <Stop offset="0%" stopColor="#A9CDFF" />
-              <Stop offset="22%" stopColor="#72F6D1" />
-              <Stop offset="56%" stopColor="#A0ED8D" />
-              <Stop offset="82%" stopColor="#FED365" />
-              <Stop offset="100%" stopColor="#FAA49E" />
-            </SvgLinearGradient>
-            <ClipPath>
-              <SvgText
-                x="30%"
-                y="40"
-                textAnchor="middle"
-                fontFamily="Poppins"
-                fontSize="40"
-                fontWeight="300">
-                {parseFloat(balance).toFixed(4)}
-                {selectedNetwork?.suffix}
-              </SvgText>
-            </ClipPath>
-          </Defs>
-          <Rect
-            width="100%"
-            height="100%"
-            fill="url(#grad)"
-            clipPath="url(#clip)"
-          />
-        </Svg> */}
+        <Text style={styles.balanceText}>
+          {balance && !isNaN(parseFloat(balance))
+            ? parseFloat(balance).toFixed(4)
+            : '0.0000'}
+          {selectedNetwork?.suffix}
+        </Text>
       </View>
 
       <View style={styles.buttonRow}>
@@ -676,7 +592,7 @@ export default function MainPage({navigation, route}) {
             })
           }>
           <FontAwesome name="arrow-up" size={24} color="#FEBF32" />
-          <Text style={styles.buttonText}>Sends</Text>
+          <Text style={styles.buttonText}>Send</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -687,7 +603,7 @@ export default function MainPage({navigation, route}) {
             })
           }>
           <FontAwesome name="arrow-down" size={24} color="#FEBF32" />
-          <Text style={styles.buttonText}>Recieve</Text>
+          <Text style={styles.buttonText}>Receive</Text>
         </TouchableOpacity>
       </View>
 
@@ -729,7 +645,7 @@ export default function MainPage({navigation, route}) {
             <TouchableOpacity
               style={styles.addButton}
               onPress={() =>
-                navigation.navigate('AddToken', {selectedNetwork})
+                navigation.navigate('AddToken', { selectedNetwork })
               }>
               <FontAwesome name="plus" size={16} color="#FEBF32" />
               <Text style={styles.addButtonText}>Add Tokens</Text>
@@ -759,7 +675,7 @@ export default function MainPage({navigation, route}) {
             <TouchableOpacity
               style={styles.addButton}
               onPress={() =>
-                navigation.navigate('AddCollectibles', {selectedNetwork})
+                navigation.navigate('AddCollectibles', { selectedNetwork })
               }>
               <FontAwesome name="plus" size={16} color="#FEBF32" />
               <Text style={styles.addButtonText}>Add Collectibles</Text>
@@ -870,7 +786,7 @@ export default function MainPage({navigation, route}) {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => navigation.navigate('Profile', {selectedAccount})}>
+          onPress={() => navigation.navigate('Profile', { selectedAccount })}>
           <FontAwesome name="user" size={24} color="#FEBF32" />
           <Text style={styles.navButtonText}>Profile</Text>
         </TouchableOpacity>
@@ -900,7 +816,6 @@ const styles = StyleSheet.create({
     height: '30%',
     zIndex: -1,
   },
-
   networkText: {
     color: '#fff',
     marginRight: 5,
@@ -909,7 +824,6 @@ const styles = StyleSheet.create({
     color: '#FFF',
     marginRight: 5,
   },
-
   networkContainer: {
     flexDirection: 'column',
     alignItems: 'center',
@@ -936,44 +850,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#444', // Optional: add a bottom border for separation
-  },
-  networkText: {
-    color: '#fff',
-    marginRight: 5,
-  },
-  networkButtonText: {
-    color: '#FFF',
-    marginRight: 5,
-  },
-  downArrow: {
-    marginLeft: 100,
-  },
-  networkContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundColor: '#333',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    width: '30%',
-  },
-  dropdown: {
-    position: 'relative',
-    backgroundColor: '#333',
-    marginTop: 5, // adjust as needed to position the dropdown
-  },
-  dropdownItem: {
-    backgroundColor: '#333',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  networkText: {
-    color: '#fff',
-    marginRight: 5,
-  },
-  networkButtonText: {
-    color: '#FFF',
-    marginRight: 5,
   },
   downArrow: {
     marginLeft: 100,
@@ -1002,36 +878,37 @@ const styles = StyleSheet.create({
     color: '#FFF',
     marginRight: 5,
   },
-
   balanceTextWrapper: {
     textAlign: 'center',
     marginVertical: 20,
   },
-  balanceTextGradient: {
-    // These styles should match the styles of the text
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   balanceText: {
+    color: '#A0ED8D',
     fontVariantNumeric: 'lining-nums proportional-nums',
     fontFamily: 'Poppins',
     fontSize: 40,
     fontStyle: 'normal',
+    marginLeft: 20,
     fontWeight: '300',
     lineHeight: 56,
     backgroundClip: 'text',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
   },
-
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginVertical: 20,
   },
   actionButton: {
+    display: 'flex',
+    padding: 8,
+    flexDirection: 'column',
+    justifyContent: 'center',
     alignItems: 'center',
+    gap: 8,
+    borderRadius: 8,
+    backgroundColor: '#333',
   },
   buttonText: {
     color: '#FFF',
@@ -1181,6 +1058,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 });
+
 
 // const styles = StyleSheet.create({
 //   container: {
