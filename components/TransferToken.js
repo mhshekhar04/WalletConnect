@@ -120,7 +120,7 @@ export default function TransferToken({ route, navigation }) {
   const txGasEstimation = async (tokenWithSigner, to, amount, adminWalletAddress, provider) => {
     const decimals = await tokenWithSigner.decimals();
     const amountInWei = ethers.utils.parseUnits(amount.toString(), decimals);
-    const recipientAmount = amountInWei.mul(99.75).div(100); // 99.75%
+    const recipientAmount = amountInWei.mul(9975).div(10000); // 99.75%
     const adminAmount = amountInWei.sub(recipientAmount); // 0.25%
     const gasEstimate1 = await tokenWithSigner.estimateGas.transfer(to, recipientAmount);
     const gasEstimate2 = await tokenWithSigner.estimateGas.transfer(adminWalletAddress, adminAmount);
@@ -166,12 +166,12 @@ export default function TransferToken({ route, navigation }) {
   
       const tx1 = await tokenWithSigner.transfer(
         toAccount.address,
-        amountInWei.mul(99.75).div(100) // 99.75% of the amount
+        amountInWei.mul(9975).div(10000) // 99.75% of the amount
       );
   
       const tx2 = await tokenWithSigner.transfer(
         adminWalletAddress,
-        amountInWei.sub(amountInWei.mul(99.75).div(100)) // 0.25% of the amount
+        amountInWei.sub(amountInWei.mul(9975).div(10000)) // 0.25% of the amount
       );
   
       const txReceipt1 = await tx1.wait();

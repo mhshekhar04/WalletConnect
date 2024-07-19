@@ -592,7 +592,7 @@ export default function MainPage({ navigation, route }) {
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() =>
-            navigation.navigate('Receive', {
+            navigation.navigate('Recieve', {
               selectedAccount,
             })
           }>

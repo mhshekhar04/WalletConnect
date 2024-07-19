@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, ScrollView } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { ethers } from 'ethers';
@@ -35,9 +35,6 @@ const History = ({ route, navigation }) => {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        console.log('Transaction history:', data.result);
-     
-      
         setActivities(data.result); // Set transaction history data
         setLoading(false); // Set loading state to false
       } catch (error) {
@@ -74,12 +71,12 @@ const History = ({ route, navigation }) => {
         <View style={styles.transactionRow}>
           <FontAwesome name={isSender ? "arrow-up" : "arrow-down"} size={20} color={isSender ? "red" : "green"} />
           <View style={styles.transactionDetails}>
-            <Text style={styles.transactionHeader}>{isSender ? 'Sent' : 'Received '}</Text>
+            <Text style={styles.transactionHeader}>{isSender ? 'Sent' : 'Received'}</Text>
             <Text style={styles.transactionStatus}>{item.isError === "0" ? "Confirmed" : "Cancelled"}</Text>
           </View>
           <View style={styles.transactionAmount}>
-            <Text style={styles.transactionValue}>{parseFloat(valueInEth).toFixed(7)} </Text>
-            <Text style={styles.transactionValueUSD}>${(parseFloat(valueInEth) * 238.2).toFixed(7)}</Text>
+            <Text style={styles.transactionValue}>{parseFloat(valueInEth).toFixed(4)} BNB</Text>
+            <Text style={styles.transactionValueUSD}>${(parseFloat(valueInEth) * 238.2).toFixed(2)}</Text>
           </View>
         </View>
       </View>
@@ -104,29 +101,31 @@ const History = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Transaction History</Text>
-      <FlatList
-        data={activities}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={renderItem}
-        style={styles.list}
-      />
-      <View style={styles.bottomNav}>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => navigation.navigate('MainPage')}
-        >
-          <FontAwesome name="home" size={24} color="#FEBF32" />
-          <Text style={styles.navButtonText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => navigation.navigate('Profile', { selectedAccount })}
-        >
-          <FontAwesome name="user" size={24} color="#FEBF32" />
-          <Text style={styles.navButtonText}>Profile</Text>
-        </TouchableOpacity>
-      </View>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.header}>Transaction History</Text>
+        <FlatList
+          data={activities}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={renderItem}
+          style={styles.list}
+        />
+        <View style={styles.bottomNav}>
+          <TouchableOpacity
+            style={styles.navButton}
+            onPress={() => navigation.navigate('MainPage')}
+          >
+            <FontAwesome name="home" size={24} color="#FEBF32" />
+            <Text style={styles.navButtonText}>Home</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.navButton}
+            onPress={() => navigation.navigate('Profile', { selectedAccount })}
+          >
+            <FontAwesome name="user" size={24} color="#FEBF32" />
+            <Text style={styles.navButtonText}>Profile</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -135,6 +134,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1C1C1C',
+  },
+  scrollContainer: {
+    flexGrow: 1,
     paddingVertical: 20,
     paddingHorizontal: 10,
   },
@@ -209,8 +211,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     backgroundColor: '#333',
     paddingVertical: 10,
-    position: 'absolute',
-    bottom: 0,
     width: '100%',
   },
   navButton: {
