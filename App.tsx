@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 /**
  * Sample React Native App
  * https://github.com/facebook/react-native
@@ -8,7 +6,7 @@
  */
 // App.tsx
 //collab with mhshekhar
->>>>>>> 4d8bf8169557fa2bb881c5e6d0f5af0dc411a7e0
+
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
